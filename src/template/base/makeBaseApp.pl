@@ -61,15 +61,15 @@ sub ReplaceFilename { # (filename)
                 $base = '' unless ($filearch eq $os && -s $file);
             } elsif (  $ENV{EPICS_HOST_ARCH} !~ "$os-$cpu" &&
                   -r "$base\@Cross" ) {	# Cross version exists
-                $base = '' unless ($filearch eq "Cross" && -s $file);
-            } elsif (-r "$base\@Common") {	# Default version exists
-                $base = '' unless ($filearch eq "Common" && -s $file);
-            } else {			# No default version
-                $base = '';
-            }
-            $file = $base;	# Strip the @... part from the target name
-        }
-        $file =~ s|/$apptypename|/iocBoot|;	# templateBoot => iocBoot
+		$base = '' unless ($filearch eq "Cross" && -s $file);
+	    } elsif (-r "$base\@Common") {	# Default version exists
+		$base = '' unless ($filearch eq "Common" && -s $file);
+	    } else {			# No default version
+		$base = '/usr/lib/epics';
+	    }
+	    $file = $base;	# Strip the @... part from the target name
+	}
+	$file =~ s|/$apptypename|/iocBoot|;	# templateBoot => iocBoot
     }
     if ($ioc) {
         $file =~ s|/iocBoot/ioc|/iocBoot/$ioc|;	# name the ioc subdirectory
@@ -177,8 +177,10 @@ sub get_commandline_opts { #no args
     } elsif ($ENV{EPICS_MBA_BASE}) { # third choice is env var EPICS_MBA_BASE
         $epics_base = UnixPath($ENV{EPICS_MBA_BASE});
     } elsif ($command =~ m|/bin/|) { # assume script was run with full path to base
-        $epics_base = $command;
-        $epics_base =~ s|^(.*)/bin/.*makeBaseApp.*|$1|;
+	$epics_base = $command;
+	$epics_base =~ s|^(.*)/bin/.*makeBaseApp.*|$1|;
+    } else {
+        $epics_base = "/usr/lib/epics";
     }
     $epics_base and -d "$epics_base" or Cleanup(1, "Can't find EPICS base");
     $app_epics_base = LocalPath($epics_base);
